@@ -1,0 +1,4 @@
+
+
+void OpenWindow();
+void CloseWindow();
