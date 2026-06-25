@@ -1,4 +1,0 @@
-
-
-void OpenWindow();
-void CloseWindow();

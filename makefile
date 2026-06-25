@@ -1,9 +1,37 @@
-CFLAGS = $(shell pkg-config --cflags raylib)
-LIBS = $(shell pkg-config --libs raylib)
+# Compiler
+CXX      := g++
+CXXFLAGS := -std=c++17 -Wall -Wextra $(shell pkg-config --cflags raylib) -IWindow -ISetUp
 
-run:
-	g++ game.cpp -o game $(CFLAGS) $(LIBS)
+# Linker flags / libraries
+LDLIBS   := $(shell pkg-config --libs raylib)
+
+# Project structure
+SRC_DIR  := .
+SRC      := \
+    game.cpp \
+    SetUp/State.cpp 
+
+OBJ      := $(SRC:.cpp=.o)
+TARGET   := game
+
+# Default build
+all: $(TARGET)
+
+# Link step
+$(TARGET): $(OBJ)
+	$(CXX) $(OBJ) -o $@ $(LDLIBS)
 	./game
 
+# Compile step
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+# Run
+run: $(TARGET)
+	./$(TARGET)
+
+# Clean
 clean:
-	rm game
+	rm -f $(OBJ) $(TARGET)
+
+.PHONY: all run clean
