@@ -1,7 +1,6 @@
-#define CHARACTER_SPEED 5
-#define GRAVITY 1
+#define CHARACTER_SPEED 10
 #define BASE_ATK 10
-#define BASE_DEF 1
+#define BASE_DEF 10
 #define BASE_SPEED 10
 
 #include <list>
@@ -13,15 +12,24 @@ enum ObjectTypes{
 };
 
 enum GameState{
-    Opening_menu, Game, Paused, Game_over
+    Opening_menu, Playing, Options, Load_menu
+};
+
+enum PlayingState{
+    Choose_race, Choose_class, Choose_deity_oath, Game, Game_Over, Paused
 };
 
 enum Directions{
     Right, Left, Up, Down
 };
 // customizable info inside the game
+
+enum Weather{
+    sunny_day, night, raining_day, cloudy_day, inside_building
+};
+
 enum Effects{
-    Power, Protection, Recovery, Haste, Storage, 
+    Power, Protect, Recovery, Haste, Storage, 
 };
 
 enum GearType{
@@ -33,10 +41,14 @@ enum Race{
 };
 
 enum Classes{
-    Warrior, Mage, Priest, Berserk, Monk, Rogue, Paladin, Ranger, Warlock
+    Warrior, Mage, Cleric, Berserk, Monk, Rogue, Paladin, Ranger, Warlock
 };
 
-enum WarlockDeities{
+enum PaladinOath{
+    Strength, Vengeance, Peace, Justice, wealth, Protection, Faith, invincibility, bravery
+};
+
+enum Deities{
     Sun, Moon, Blood, Time, Space, Death, Fire, Water, Arch_Devil
 };
 // Abilities: 
@@ -70,7 +82,7 @@ struct Modifiers{
 };
 
 //helper functions 
- Modifiers GetModifiers(Race race);
+Modifiers GetModifiers(Race race);
 
 // Object classes
 class Object{
@@ -101,6 +113,17 @@ class Object{
     }
 };
 
+class Skill{
+    private:
+        std::string name;
+        Effects effect;
+        int Power_of_effect;
+        int duration;
+        int cooldown;
+    public:
+    Effects GetEffect(){return effect;};
+    int GetEffectPower(){return Power_of_effect;};
+};
 
 class StaticObjectGear: public Object{
     private:
@@ -131,6 +154,7 @@ class Character_Cl: public Gear {
         std::pair<int, int>PositionXY;
         ObjectTypes type;
         Race Char_Race;
+        Classes Char_class;
         double Level;
         double Hp;
         double Mp_Sta;
@@ -139,15 +163,18 @@ class Character_Cl: public Gear {
         double Range;
         double speed;
         double size;
-        double kill_count;
+        double karma;
         double regen;
+        double crit_chance;
+        int oath_deity;
         Directions Moving_Dir;
+        std::list<Skill> skills;
     public:
         // constructor
-        Character_Cl(Race char_race):
+        Character_Cl():
             PositionXY(GetScreenWidth()/2,GetScreenHeight()/2),
             type(Character),
-            Char_Race(char_race),
+            Char_Race(Human),
             Level(1),
             // using a modifier change basic values for each race
             Hp (100),
@@ -157,10 +184,14 @@ class Character_Cl: public Gear {
             Range (5),//changes according to the class
             speed (BASE_SPEED),//also changes according class and race
             size (10),//changes according to race
-            kill_count(0),
+            karma(0),
             regen (1),
+            crit_chance(10),
+            oath_deity(0),
             Moving_Dir(Right)
-        {
+        {}
+
+        void SetStatsModifier(Race char_race){
             Modifiers mod = GetModifiers(char_race);
             Hp *= mod.Hp;
             Mp_Sta *= mod.Mp_Sta;
@@ -169,6 +200,44 @@ class Character_Cl: public Gear {
             speed *= mod.speed;
             size *= mod.size;
             regen *= mod.regen;
+        }
+
+        Race GetCharacterRace(){
+            return Char_Race;
+        }
+
+        Classes GetCharacterClass(){
+            return Char_class;
+        }
+
+        void ChangeCharacter(Race new_race){
+            Char_Race = new_race;
+            SetStatsModifier(new_race);
+        }
+
+        void ChangeCharacter(Classes new_class){
+            Char_class = new_class;
+            // Range = GetClassRange(new_class);//a function that returns the class' range
+        }
+
+        void IncreaseKarma(int amount){
+            karma += amount;
+        }
+
+        int GetKarma(){
+            return karma;
+        }
+
+        void AddSkill(Skill skill){
+            skills.push_back(skill);
+        }
+
+        int GetCharacterDeityOath(){
+            return oath_deity;
+        }
+
+        void SetOathDeity(int Deity_Oath){
+            oath_deity = Deity_Oath;
         }
     };
 
@@ -190,32 +259,69 @@ class MovingObject: public Object, public Gear{
 class State{
     private:
         GameState Game_State;
+        PlayingState During_game_state;
+        Weather Weather_state;
         Character_Cl *Player;
         std::list<MovingObject> Moving_Objects;
         std::list<StaticObjectGear> Static_Objects;
         
     public:
         // constructor
-        State(Race char_race){
+        State(){
             Game_State = Opening_menu;
-            Player = new Character_Cl(char_race);
+            During_game_state = Choose_race;
+            Weather_state = inside_building;
+            Player = new Character_Cl();
             
         };
 
         GameState GetGameState(){
             return Game_State;
         }
+
+        void SetGameState(GameState new_game_state){
+            Game_State = new_game_state;
+        }
+        
+        PlayingState GetPlayingState(){
+            return During_game_state;
+        }
+
+        void SetPlayingState(PlayingState new_playing_state){
+            During_game_state = new_playing_state;
+        }
+
+        Race GetRace(){
+            return Player->GetCharacterRace();
+        };
+
+        void SetRace(Race new_race){
+            Player->ChangeCharacter(new_race);
+        }
+
+        Classes GetClass(){
+            return Player->GetCharacterClass();
+        }
+
+        void SetClass(Classes new_class){
+            Player->ChangeCharacter(new_class);
+        }
+
+        int GetDeityOath(){
+            return Player->GetCharacterDeityOath();
+        }
+
+        void SetDeityOath(int Deity_oath){
+            Player->SetOathDeity(Deity_oath);
+        }
 };
-
-
-
 
 // function for other files
 
-// void ClearState();
+void ClearState(State* state);
 // 
 // void RenderWindow(State state);
 // 
 // State StateUpdate();
 // 
-// State* StateCreate();
+State* StateCreate();

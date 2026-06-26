@@ -2,9 +2,8 @@
 #include "State.h"
 #include <set>
 #include <iostream>
-
 // 
-//          All helper function go here
+//      Helper functions
 // 
 Modifiers GetModifiers(Race race){
     switch (race){
@@ -32,27 +31,20 @@ Modifiers GetModifiers(Race race){
     // 
 // }
 
-// Race GetRace(){
-// 
-// };
 
-void RenderWindow(State state){
-    if (state.GetGameState() == Opening_menu){
-        DrawText("Hello World!",GetScreenWidth()/2,GetScreenHeight()/2, 50, WHITE);
-    }
-
-}
 // 
 //          Basic Code
 // 
 
 // this must obtain the inputs from the user and make the starting state. This info will be saved in a json file for save/load function.
-// State* StateCreate(){
-    // State* state = new State(race);
-    // return state;
-// }
+State* StateCreate(){
+    State *state = new State();
+    state->SetGameState(Opening_menu);
+    return state;
+}
 
 // this will be used to update the frames(careful with the loops, this will run 60 times per sec. complicated algorithms will ruin everything.)
+
 // void StateUpdate(State state){
     // 
 // }
@@ -61,6 +53,6 @@ void RenderWindow(State state){
 
 // delete State and free memory
 
-// void ClearState(){
-// 
-// }
+void ClearState(State* state){
+    delete state;
+}

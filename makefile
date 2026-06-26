@@ -1,6 +1,6 @@
 # Compiler
 CXX      := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra $(shell pkg-config --cflags raylib) -IWindow -ISetUp
+CXXFLAGS := -std=c++17 -Wall -Wextra -Werror $(shell pkg-config --cflags raylib) -IWindow -ISetUp
 
 # Linker flags / libraries
 LDLIBS   := $(shell pkg-config --libs raylib)
@@ -20,7 +20,6 @@ all: $(TARGET)
 # Link step
 $(TARGET): $(OBJ)
 	$(CXX) $(OBJ) -o $@ $(LDLIBS)
-	./game
 
 # Compile step
 %.o: %.cpp
