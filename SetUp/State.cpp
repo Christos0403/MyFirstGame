@@ -45,11 +45,9 @@ State* StateCreate(){
 
 // this will be used to update the frames(careful with the loops, this will run 60 times per sec. complicated algorithms will ruin everything.)
 
-// void StateUpdate(State state){
+// void StateUpdate(State state, Keys key_state){
     // 
 // }
-
-
 
 // delete State and free memory
 

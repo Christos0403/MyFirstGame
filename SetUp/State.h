@@ -2,6 +2,9 @@
 #define BASE_ATK 10
 #define BASE_DEF 10
 #define BASE_SPEED 10
+#define BASIC_HP 100
+#define BASIC_MP 100
+
 
 #include <list>
 #include <string>
@@ -29,7 +32,7 @@ enum Weather{
 };
 
 enum Effects{
-    Power, Protect, Recovery, Haste, Storage, 
+    Power, Protect, Recovery, Haste, Poison, Weakness, Slowness, Fragility
 };
 
 enum GearType{
@@ -69,7 +72,7 @@ Lucifer: Devil summoning
 enum EnemyTypes{
     Slime, Skeleton, Devil, Insect, Bandit, IRS
 };
-
+// helper structs
 struct Modifiers{
     float Hp;
     float Mp_Sta;
@@ -79,6 +82,18 @@ struct Modifiers{
     float size;
     float regen;
     float exp_gain;
+};
+
+struct Keys{
+    bool Key_A;
+    bool Key_S;
+    bool Key_W;
+    bool Key_D;
+    bool Key_Down_Arrow;
+    bool Key_Up_Arrow;
+    bool Key_Right_Arrow;
+    bool Key_Left_Arrow;
+    bool Key_Enter;
 };
 
 //helper functions 
@@ -157,7 +172,9 @@ class Character_Cl: public Gear {
         Classes Char_class;
         double Level;
         double Hp;
-        double Mp_Sta;
+        double Max_Hp;
+        double Mp;
+        double Max_Mp;
         double Atk;
         double Def;
         double Range;
@@ -167,6 +184,7 @@ class Character_Cl: public Gear {
         double regen;
         double crit_chance;
         int oath_deity;
+        int coins;
         Directions Moving_Dir;
         std::list<Skill> skills;
     public:
@@ -177,8 +195,10 @@ class Character_Cl: public Gear {
             Char_Race(Human),
             Level(1),
             // using a modifier change basic values for each race
-            Hp (100),
-            Mp_Sta (100),
+            Hp (BASIC_HP),
+            Max_Hp(BASIC_HP),
+            Mp (BASIC_MP),
+            Max_Mp(BASIC_MP),
             Atk (BASE_ATK),
             Def (BASE_DEF),
             Range (5),//changes according to the class
@@ -188,13 +208,14 @@ class Character_Cl: public Gear {
             regen (1),
             crit_chance(10),
             oath_deity(0),
+            coins(0),
             Moving_Dir(Right)
         {}
 
         void SetStatsModifier(Race char_race){
             Modifiers mod = GetModifiers(char_race);
             Hp *= mod.Hp;
-            Mp_Sta *= mod.Mp_Sta;
+            Mp *= mod.Mp_Sta;
             Atk *= mod.Atk;
             Def *= mod.Def;
             speed *= mod.speed;
@@ -238,6 +259,34 @@ class Character_Cl: public Gear {
 
         void SetOathDeity(int Deity_Oath){
             oath_deity = Deity_Oath;
+        }
+
+        int GetCoins(){
+            return coins;
+        }
+
+        void IncreaseCoins(int increase){
+            coins += increase;
+        }
+
+        double GetHp(){
+            return Hp;
+        }
+
+        void IncreaseHp(double increase){
+            Hp += increase;
+        }
+
+        double GetMp(){
+            return Mp;
+        }
+
+        void IncreaseMp(double increase){
+            Mp += increase;
+        }
+
+        int GetLevel(){
+            return Level;
         }
     };
 
@@ -314,6 +363,34 @@ class State{
         void SetDeityOath(int Deity_oath){
             Player->SetOathDeity(Deity_oath);
         }
+
+        int GetCoins(){
+            return Player->GetCoins();
+        }
+
+        void IncreaseCoins(int increase){
+            Player->IncreaseCoins(increase);
+        }
+
+        double GetHp(){
+            return Player->GetHp();
+        }
+
+        void IncreaseHp(double increase){
+            Player->IncreaseHp(increase);
+        }
+
+        double GetMp(){
+            return Player->GetMp();
+        }
+
+        void IncreaseMp(double increase){
+            Player->IncreaseMp(increase);
+        }
+
+        int GetLevel(){
+            return Player->GetLevel();
+        }
 };
 
 // function for other files
@@ -322,6 +399,6 @@ void ClearState(State* state);
 // 
 // void RenderWindow(State state);
 // 
-// State StateUpdate();
-// 
+// State* StateUpdate(State* state, Keys key_state);
+
 State* StateCreate();

@@ -5,6 +5,12 @@
 #define TITLE_FONT 100
 #define GAME_TITLE "Game Title"
 
+#define BACKPACK_POSITION_X 1800
+#define BACKPACK_POSITION_Y 50
+
+#define COINS_POSITION_X 1700
+#define COINS_POSITION_Y 50
+
 #define FRAMES_FOR_BLINKING 30
 long long frame_counter = 0;
 bool visible = true;
@@ -37,23 +43,14 @@ bool flag = true;
 int pos_X = 100;
 int pos_Y = 100;
 
+// The character Texture
+Texture2D Character_Texture = LoadTexture("resources/Human.png");
+
 int GetCenter(int font, const char *text){
     int Text_size = MeasureText(text, font);
 
     return (GetScreenWidth()- Text_size)/2;
 }
-
-struct Keys{
-    bool Key_A;
-    bool Key_S;
-    bool Key_W;
-    bool Key_D;
-    bool Key_Down_Arrow;
-    bool Key_Up_Arrow;
-    bool Key_Right_Arrow;
-    bool Key_Left_Arrow;
-    bool Key_Enter;
-};
 
 Keys GetPressedKeys(){
     Keys Key_state = {false,false,false,false,false,false,false,false,false};
@@ -309,12 +306,64 @@ void ChooseClass(State* state, Keys key_state){
     if (key_state.Key_Enter){
         new_class = Classes((cursor.GetCursorY()-100)/100);
         state->SetClass(new_class);
-        state->SetPlayingState(Choose_deity_oath);
+        if (new_class == Paladin || new_class == Cleric || new_class == Warlock){
+            state->SetPlayingState(Choose_deity_oath);
+        } else {
+            state->SetPlayingState(Game);
+        }
         flag = true;
     }
 }
 
 // Oath/DeitySelection
+const char* GetDeityOathExplanation(Classes Cur_class, int Deity_Oath){
+    if (Cur_class == Paladin){
+        switch(PaladinOath(Deity_Oath)){
+            // Strength, Vengeance, Peace, Justice, wealth, Protection, Faith, invincibility, bravery
+            case Strength:
+            return "Advantage: +2 Atk for each LevelUp \n\n\nDisadvantage: Loses the ability to deceive";
+            case Vengeance:
+            return "Advantage: +10%% Exp per kill \n\n\nDisadvantage: One random character is chosen to become your lethal enemy, you don't know which one.";
+            case Peace:
+            return "Advantage: +100 Karma \n\n\nDisadvantage: You are not allowed to start a fight with a non-Enemy";
+            case Justice:
+            return "Advantage: Your Karma cannot go below 0.\n\n\nDisadvantage: You are not allowed be unjust. If you are your Karma decreases by 100";
+            case wealth:
+            return "Advantage: Increased coin gain per kill\n\n\nDisadvantage: You are not allowed to waste money in unimportant things(including weapons and armor if you have equipped ones.)";
+            case Protection:
+            return "Advantage: +5 Def per Level during in a fight\n\n\nDisadvantage: Any party members that reach lower than 30%% Hp have to be saved. If not you lose 5 Def";
+            case Faith:
+            return "Advantage: +5 Mp per Level during a fight\n\n\nDisadvantage: if you forget to visit a church and pray to your god, when you reach a town you lose 5 Mp";
+            case invincibility:
+            return "Advantage: +5 Atk per Level during a fight\n\n\nDisadvantage: You are not allowed to take damage. Each time you take you lose 5 Atk.";
+            default:
+            return "Advantage: +2 Speed per Level during a fight \n\n\nDisadvantage: You are not allowed to run from a fight. If you do you lose 2 speed";
+        }
+    } else {
+        switch(Deities(Deity_Oath)){
+            // Sun, Moon, Blood, Time, Space, Death, Fire, Water, Arch_Devil
+            case Sun:
+            return "Advantage: \nSkill tree: Light/Sun\n\n\nWeakness: Loses access to skills from other deities.";
+            case Moon:
+            return "Advantage: \nSkill tree: Darkness/Moon\n\n\nWeakness: Loses access to skills from other deities.";
+            case Blood:
+            return "Advantage: \nSkill tree: Blood\n\n\nWeakness: Loses access to skills from other deities.";
+            case Time:
+            return "Advantage: \nSkill tree: Time\n\n\nWeakness: Loses access to skills from other deities.";
+            case Space:
+            return "Advantage: \nkeill tree: Space\n\n\nWeakness: Loses access to skills from other deities.";
+            case Death:
+            return "Advantage: \nSkill tree: Necromancy\n\n\nWeakness: Loses access to skills from other deities.";
+            case Fire:
+            return "Advantage: \nSkill tree: Fire\n\n\nWeakness: Loses access to skills from other deities.";
+            case Water:
+            return "Advantage: \nSkill tree: Water\n\n\nWeakness: Loses access to skills from other deities.";
+            default:
+            return "Advantage: \nSkill tree: summoning\n\n\nWeakness: Loses access to skills from other deities.";
+        }
+    }
+}
+
 const char* DeityOathToText(Classes Cur_class, int Deity_Oath){
     if (Cur_class == Paladin){
         switch(PaladinOath(Deity_Oath)){
@@ -363,6 +412,11 @@ const char* DeityOathToText(Classes Cur_class, int Deity_Oath){
     }
 };
 
+void PrintDeityOathDetails(Classes Cur_class, int Deity_Oath){
+   DrawText(DeityOathToText(Cur_class,Deity_Oath),GetCenter(TITLE_FONT,DeityOathToText(Cur_class,Deity_Oath)),100, TITLE_FONT, WHITE);
+   DrawText(GetDeityOathExplanation(Cur_class, Deity_Oath),500,200, 40, WHITE);
+}
+
 void ChooseDeityOath(State* state, Keys key_state){
     pos_X = 100;
     pos_Y = 100;
@@ -388,12 +442,68 @@ void ChooseDeityOath(State* state, Keys key_state){
         cursor.SetCursorY(cursor.GetCursorY() -100);
     }
 
-    // PrintClassDetails(Classes(int((cursor.GetCursorY()-100)/100)));
+    PrintDeityOathDetails(state->GetClass(),int((cursor.GetCursorY()-100)/100));
     if (key_state.Key_Enter){
         state->SetDeityOath((cursor.GetCursorY()-100)/100);
         state->SetPlayingState(Game);
         flag = true;
     }
+}
+// Basic Prints
+void PrintBasicMenus(State* state){
+    DrawTexture(LoadTexture("resources/backpack.png"),BACKPACK_POSITION_X, BACKPACK_POSITION_Y, WHITE);
+    DrawText("[I]",BACKPACK_POSITION_X+26,BACKPACK_POSITION_Y + 70, 15, WHITE );
+
+    DrawTexture(LoadTexture("resources/Coins.png"),COINS_POSITION_X, COINS_POSITION_Y, WHITE);
+    DrawText(TextFormat("%d",state->GetCoins()),COINS_POSITION_X+26, COINS_POSITION_Y+70, 15, WHITE );
+    
+    DrawText(TextFormat("Level: %d", state->GetLevel()),100, 20, 20, WHITE);
+
+    DrawRectangle(100,50,500,20, RED);
+    DrawText("Hp:", 60, 50, 20, WHITE);
+
+    DrawRectangle(100, 80, 500, 20, BLUE);
+    DrawText("Mp:", 60, 80, 20, WHITE);
+
+}
+
+void DrawCharacterTexture(State* State){
+    switch(State->GetRace()){
+        case Human:
+        Character_Texture = LoadTexture("resources/Human.png");
+        break;
+        case Elf:
+        Character_Texture = LoadTexture("resources/Elf.png");
+        break;
+        case Dwarf:
+        Character_Texture = LoadTexture("resources/Dwarf.png");
+        break;
+        case Demon:
+        Character_Texture = LoadTexture("resources/Demon.png");
+        break;
+        case Angel:
+        Character_Texture = LoadTexture("resources/Angel.png");
+        break;
+        case Giant:
+        Character_Texture = LoadTexture("resources/Giant.png");
+        break;
+        case Vampire:
+        Character_Texture = LoadTexture("resources/Vampire.png");
+        break;
+        default:
+        Character_Texture = LoadTexture("resources/Dragonoid.png");
+        break;
+    }
+    DrawTexture(Character_Texture,(GetScreenWidth()/2)-64,(GetScreenHeight()/2)-64,WHITE);
+}
+
+// BasicGame function
+void PlayGame(State* state, Keys key_state){
+    PrintBasicMenus(state);
+    DrawCharacterTexture(state);
+    
+    key_state = key_state;
+    // StateUpdate(state, key_state);
 }
 
 //main function.
@@ -413,14 +523,14 @@ int main(){
         if (state->GetGameState() == Opening_menu){   
             DrawOpeningMenu(state, Key_state);
         } else if (state->GetGameState() == Playing){
-            if (state->GetPlayingState() ==Choose_race){
+            if (state->GetPlayingState() == Choose_race){
                 ChooseRace(state, Key_state);
             } else if(state->GetPlayingState() == Choose_class){
                 ChooseClass(state, Key_state);
             } else if (state->GetPlayingState() == Choose_deity_oath){
                 ChooseDeityOath(state, Key_state);
-            } else {
-                DrawText(DeityOathToText(state->GetClass(),state->GetDeityOath()), 500, 500, 100, WHITE);
+            } else if (state->GetPlayingState() == Game){
+                PlayGame(state, Key_state);
             }
         }
         //we end the drawing and move to the next itteration
