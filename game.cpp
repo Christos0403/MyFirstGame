@@ -44,7 +44,7 @@ int pos_X = 100;
 int pos_Y = 100;
 
 // The character Texture
-Texture2D Character_Texture = LoadTexture("resources/Human.png");
+Texture2D Character_Texture = LoadTexture("Assets/Human.png");
 
 int GetCenter(int font, const char *text){
     int Text_size = MeasureText(text, font);
@@ -451,10 +451,10 @@ void ChooseDeityOath(State* state, Keys key_state){
 }
 // Basic Prints
 void PrintBasicMenus(State* state){
-    DrawTexture(LoadTexture("resources/backpack.png"),BACKPACK_POSITION_X, BACKPACK_POSITION_Y, WHITE);
+    DrawTexture(LoadTexture("Assets/backpack.png"),BACKPACK_POSITION_X, BACKPACK_POSITION_Y, WHITE);
     DrawText("[I]",BACKPACK_POSITION_X+26,BACKPACK_POSITION_Y + 70, 15, WHITE );
 
-    DrawTexture(LoadTexture("resources/Coins.png"),COINS_POSITION_X, COINS_POSITION_Y, WHITE);
+    DrawTexture(LoadTexture("Assets/Coins.png"),COINS_POSITION_X, COINS_POSITION_Y, WHITE);
     DrawText(TextFormat("%d",state->GetCoins()),COINS_POSITION_X+26, COINS_POSITION_Y+70, 15, WHITE );
     
     DrawText(TextFormat("Level: %d", state->GetLevel()),100, 20, 20, WHITE);
@@ -467,33 +467,57 @@ void PrintBasicMenus(State* state){
 
 }
 
-void DrawCharacterTexture(State* State){
-    switch(State->GetRace()){
-        case Human:
-        Character_Texture = LoadTexture("resources/Human.png");
-        break;
-        case Elf:
-        Character_Texture = LoadTexture("resources/Elf.png");
-        break;
-        case Dwarf:
-        Character_Texture = LoadTexture("resources/Dwarf.png");
-        break;
-        case Demon:
-        Character_Texture = LoadTexture("resources/Demon.png");
-        break;
-        case Angel:
-        Character_Texture = LoadTexture("resources/Angel.png");
-        break;
-        case Giant:
-        Character_Texture = LoadTexture("resources/Giant.png");
-        break;
-        case Vampire:
-        Character_Texture = LoadTexture("resources/Vampire.png");
-        break;
-        default:
-        Character_Texture = LoadTexture("resources/Dragonoid.png");
-        break;
+void DrawCharacterTexture(State* state){
+    const char* texture = "";
+    if (state->GetDirection() == Right){
+        switch(state->GetRace()){
+            case Human:
+            if (state->GetClass() == Warrior){
+                texture = "Assets/Warrior/Human Right.png";
+            } else if (state->GetClass() == Mage){
+                texture = "Assets/Warrior/Human Right.png";
+            } else if (state->GetClass() == Cleric){
+
+            }else if (state->GetClass() == Berserk){
+
+            }else if(state->GetClass() == Monk){
+
+            }else if (state->GetClass() == Rogue){
+
+            } else if (state->GetClass() == Rogue){
+
+            }else if (state->GetClass() == Paladin){
+
+            } else if (state->GetClass() == Warlock){
+
+            }
+            break;
+            case Elf:
+
+            break;
+            case Dwarf:
+
+            break;
+            case Demon:
+
+            break;
+            case Angel:
+
+            break;
+            case Giant:
+
+            break;
+            case Vampire:
+
+            break;
+            default:
+
+            break;
+        }
+    } else {
+
     }
+    Character_Texture = LoadTexture(texture);
     DrawTexture(Character_Texture,(GetScreenWidth()/2)-64,(GetScreenHeight()/2)-64,WHITE);
 }
 

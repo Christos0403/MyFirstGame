@@ -23,7 +23,7 @@ enum PlayingState{
 };
 
 enum Directions{
-    Right, Left, Up, Down
+    Right, Left
 };
 // customizable info inside the game
 
@@ -288,6 +288,14 @@ class Character_Cl: public Gear {
         int GetLevel(){
             return Level;
         }
+
+        void ChangeDirection(Directions new_direction){
+            Moving_Dir = new_direction;
+        }
+
+        Directions GetDirection(){
+            return Moving_Dir;
+        }
     };
 
 class MovingObject: public Object, public Gear{
@@ -390,6 +398,14 @@ class State{
 
         int GetLevel(){
             return Player->GetLevel();
+        }
+
+        Directions GetDirection(){
+            return Player->GetDirection();
+        }
+
+        void SetDirection(Directions new_direction){
+            Player->ChangeDirection(new_direction);
         }
 };
 
